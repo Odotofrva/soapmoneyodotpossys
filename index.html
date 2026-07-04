@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#ffffff" />
+  <title>CoreSoap POS | Soap Money | OdotNYC</title>
+  <style>
+    :root {
+      --bg: #f6f6f3;
+      --paper: #ffffff;
+      --ink: #080808;
+      --muted: #6f6f6a;
+      --line: #e6e6df;
+      --line-strong: #d7d7cf;
+      --soft: #f0f0eb;
+      --black: #000000;
+      --white: #ffffff;
+      --good: #0f7a3b;
+      --danger: #a32727;
+      --radius: 22px;
+      --shadow: 0 24px 80px rgba(0,0,0,.08);
+      --font: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: var(--font);
+    }
+    img { display: block; max-width: 100%; }
+    button, input, select, textarea { font: inherit; }
+    button { -webkit-tap-highlight-color: transparent; }
+
+    .shell {
+      width: min(1380px, calc(100% - 24px));
+      margin: 0 auto;
+      padding: 14px 0 80px;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      min-height: 72px;
+      padding: 12px 14px;
+      background: rgba(246,246,243,.88);
+      backdrop-filter: blur(18px);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+    .brand-mark {
+      width: 46px;
+      height: 46px;
+      border-radius: 14px;
+      background: #000;
+      border: 1px solid #000;
+      display: grid;
+      place-items: center;
+      padding: 8px;
+      flex: 0 0 auto;
+    }
+    .brand-title strong { display: block; font-size: .95rem; letter-spacing: .08em; text-transform: uppercase; line-height: 1; }
+    .brand-title span { display: block; margin-top: 4px; font-size: .72rem; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; }
+
+    .top-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+    }
+
+    .chip, .btn {
+      border: 1px solid var(--line-strong);
+      background: var(--paper);
+      color: var(--ink);
+      border-radius: 999px;
+      padding: 10px 13px;
+      font-weight: 800;
+      font-size: .82rem;
+      cursor: pointer;
+      min-height: 42px;
+      transition: transform .16s ease, background .16s ease, border-color .16s ease, opacity .16s ease;
+    }
+    .chip { cursor: default; color: var(--muted); }
+    .btn:hover { transform: translateY(-1px); border-color: #111; }
+    .btn.primary { background: #000; color: #fff; border-color: #000; }
+    .btn.danger { color: var(--danger); }
+    .btn:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+
+    .board {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(360px, 430px);
+      gap: 16px;
+      align-items: start;
+      padding-top: 16px;
+    }
+
+    .panel {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-height: 62px;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+    }
+    .panel-head h1, .panel-head h2 { margin: 0; font-size: 1rem; text-transform: uppercase; letter-spacing: .08em; }
+    .panel-head img { width: 112px; }
+
+    .products-top {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      padding: 14px 16px 0;
+    }
+    .input, .select, textarea {
+      width: 100%;
+      border: 1px solid var(--line-strong);
+      border-radius: 16px;
+      background: #fff;
+      color: var(--ink);
+      padding: 12px 13px;
+      outline: 0;
+      min-height: 46px;
+    }
+    .input:focus, .select:focus, textarea:focus { border-color: #000; box-shadow: 0 0 0 3px rgba(0,0,0,.06); }
+
+    .filter-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      padding: 12px 16px 0;
+    }
+    .filter-chip {
+      border: 1px solid var(--line-strong);
+      background: #fff;
+      color: var(--muted);
+      border-radius: 999px;
+      padding: 9px 12px;
+      font-size: .75rem;
+      font-weight: 850;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+    .filter-chip.active { color: #fff; background: #000; border-color: #000; }
+
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      padding: 16px;
+    }
+    .product-card {
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      background: #fff;
+      padding: 12px;
+      cursor: pointer;
+      transition: transform .16s ease, border-color .16s ease, box-shadow .16s ease;
+    }
+    .product-card:hover { transform: translateY(-2px); border-color: #111; box-shadow: 0 18px 40px rgba(0,0,0,.08); }
+    .photo {
+      height: clamp(280px, 28vw, 360px);
+      display: grid;
+      place-items: center;
+      border-radius: 18px;
+      background: var(--soft);
+      border: 1px solid var(--line);
+      overflow: hidden;
+      position: relative;
+      padding: 12px;
+    }
+    .photo img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      object-position: center;
+    }
+    .badge {
+      position: absolute;
+      top: 9px;
+      left: 9px;
+      background: rgba(0,0,0,.82);
+      color: #fff;
+      border-radius: 999px;
+      padding: 6px 8px;
+      font-size: .62rem;
+      font-weight: 900;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+    .product-name { margin: 12px 0 0; font-size: .95rem; font-weight: 900; line-height: 1.1; }
+    .product-price { margin-top: 4px; color: var(--muted); font-weight: 800; }
+    .product-options { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+    .product-options .select { min-height: 38px; padding: 8px 9px; border-radius: 12px; font-size: .78rem; }
+    .add-product { width: 100%; margin-top: 10px; border-radius: 14px; }
+
+    .sale-panel { position: sticky; top: 88px; }
+    .cart-list { display: grid; gap: 10px; padding: 14px 16px; max-height: 330px; overflow: auto; }
+    .empty { padding: 22px; border: 1px dashed var(--line-strong); border-radius: 20px; color: var(--muted); text-align: center; }
+    .cart-item {
+      display: grid;
+      grid-template-columns: 58px 1fr;
+      gap: 10px;
+      align-items: center;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 9px;
+      background: #fff;
+    }
+    .cart-item img { width: 58px; height: 62px; border-radius: 13px; background: #f5f5f0; object-fit: contain; border: 1px solid var(--line); }
+    .cart-item h3 { margin: 0; font-size: .86rem; line-height: 1.1; }
+    .cart-item p { margin: 3px 0 8px; color: var(--muted); font-size: .72rem; }
+    .qty-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .qty-controls { display: inline-flex; align-items: center; gap: 5px; border: 1px solid var(--line); border-radius: 999px; padding: 3px; }
+    .qty-controls button { border: 0; border-radius: 999px; width: 26px; height: 26px; background: #000; color: #fff; font-weight: 900; cursor: pointer; }
+    .qty-controls span { min-width: 20px; text-align: center; font-weight: 900; font-size: .78rem; }
+    .line-total { font-weight: 950; }
+
+    .sale-form { border-top: 1px solid var(--line); padding: 14px 16px 16px; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .form-grid .full { grid-column: 1 / -1; }
+    label span { display: block; color: var(--muted); font-size: .68rem; text-transform: uppercase; letter-spacing: .07em; font-weight: 900; margin: 0 0 6px 2px; }
+    .required-star { color: var(--danger); }
+
+    .totals {
+      display: grid;
+      gap: 8px;
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid var(--line);
+    }
+    .total-row { display: flex; align-items: center; justify-content: space-between; color: var(--muted); }
+    .total-row strong { color: var(--ink); }
+    .total-row.final { color: var(--ink); font-size: 1.35rem; font-weight: 950; }
+
+    .checkout-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
+    .checkout-actions .wide { grid-column: 1 / -1; }
+    .big-btn {
+      border: 0;
+      border-radius: 16px;
+      background: #000;
+      color: #fff;
+      padding: 14px 16px;
+      min-height: 52px;
+      font-weight: 950;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      transition: transform .16s ease, opacity .16s ease;
+    }
+    .big-btn:hover { transform: translateY(-1px); }
+    .big-btn.secondary { background: #fff; color: #000; border: 1px solid var(--line-strong); }
+    .big-btn.danger { background: #fff; color: var(--danger); border: 1px solid #efcaca; }
+
+    .recent { margin-top: 16px; }
+    .recent-list { padding: 14px 16px 16px; display: grid; gap: 8px; max-height: 300px; overflow: auto; }
+    .sale-card { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center; border: 1px solid var(--line); border-radius: 16px; padding: 11px; }
+    .sale-card strong { display: block; font-size: .86rem; }
+    .sale-card span { display: block; margin-top: 3px; color: var(--muted); font-size: .72rem; }
+    .sale-card .sale-actions { display: flex; gap: 6px; }
+    .icon-btn { border: 1px solid var(--line-strong); border-radius: 999px; background: #fff; padding: 8px 10px; font-weight: 850; font-size: .7rem; cursor: pointer; }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display: none;
+      place-items: center;
+      background: rgba(0,0,0,.58);
+      padding: 16px;
+      backdrop-filter: blur(8px);
+    }
+    .modal-backdrop.show { display: grid; }
+    .modal {
+      width: min(760px, 100%);
+      max-height: 92vh;
+      overflow: auto;
+      border-radius: 28px;
+      background: #fff;
+      box-shadow: 0 28px 90px rgba(0,0,0,.22);
+    }
+    .modal-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 14px 16px; border-bottom: 1px solid var(--line); }
+    .modal-head h2 { margin: 0; font-size: 1rem; text-transform: uppercase; letter-spacing: .08em; }
+    .modal-close { width: 40px; height: 40px; border: 0; border-radius: 999px; background: #000; color: #fff; font-size: 1.2rem; cursor: pointer; }
+    .modal-body { padding: 16px; }
+    .receipt-paper { border: 1px solid var(--line); border-radius: 24px; padding: 20px; background: #fbfbf7; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    .receipt-logo { width: 122px; margin: 0 auto 12px; filter: invert(1); }
+    .receipt-title { text-align: center; font-weight: 900; letter-spacing: .08em; }
+    .receipt-meta { text-align: center; color: #666; font-size: .82rem; margin-top: 4px; }
+    .receipt-line { display: grid; grid-template-columns: 58px 1fr auto; gap: 10px; align-items: center; padding: 11px 0; border-bottom: 1px dashed #ccc; }
+    .receipt-line img { width: 58px; height: 62px; object-fit: contain; border-radius: 12px; background: #fff; border: 1px solid #e2e2dc; }
+    .receipt-line h4 { margin: 0; font-size: .9rem; }
+    .receipt-line p { margin: 4px 0 0; color: #666; font-size: .78rem; }
+    .receipt-total { display: flex; justify-content: space-between; gap: 10px; padding: 6px 0; }
+    .receipt-total.final { border-top: 2px solid #000; margin-top: 9px; padding-top: 11px; font-size: 1.1rem; font-weight: 900; }
+    .receipt-actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 14px; }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 18px;
+      z-index: 140;
+      transform: translate(-50%, 110px);
+      background: #000;
+      color: #fff;
+      border-radius: 999px;
+      padding: 12px 16px;
+      font-weight: 850;
+      box-shadow: 0 18px 50px rgba(0,0,0,.22);
+      transition: transform .22s ease;
+      white-space: nowrap;
+    }
+    .toast.show { transform: translate(-50%, 0); }
+
+    .micro-bubble {
+      position: fixed;
+      z-index: 150;
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.92);
+      pointer-events: none;
+      box-shadow: 0 0 16px rgba(255,255,255,.6);
+      animation: bubbleRise .7s ease-out forwards;
+    }
+    @keyframes bubbleRise { to { opacity: 0; transform: translateY(-54px) scale(.2); } }
+
+    footer {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      padding: 18px 4px 0;
+      color: var(--muted);
+      font-size: .82rem;
+    }
+
+
+
+    /* Full-image cards + theme support */
+    body,
+    .topbar,
+    .panel,
+    .product-card,
+    .cart-item,
+    .sale-card,
+    .modal,
+    .input,
+    .select,
+    textarea,
+    .btn,
+    .filter-chip,
+    .big-btn,
+    .icon-btn {
+      transition: background-color .18s ease, color .18s ease, border-color .18s ease, box-shadow .18s ease;
+    }
+
+    .product-card {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    .product-name,
+    .product-price,
+    .product-options,
+    .add-product {
+      flex: 0 0 auto;
+    }
+
+    .photo {
+      flex: 1 1 auto;
+      min-height: clamp(280px, 28vw, 360px);
+    }
+
+    html[data-theme="dark"] {
+      color-scheme: dark;
+      --bg: #090909;
+      --paper: #141414;
+      --ink: #f7f7f2;
+      --muted: #a4a49e;
+      --line: #2b2b2b;
+      --line-strong: #3d3d3a;
+      --soft: #20201d;
+      --shadow: 0 24px 80px rgba(0,0,0,.36);
+      --good: #8be7a9;
+      --danger: #ff9b9b;
+    }
+
+    html[data-theme="dark"] .topbar {
+      background: rgba(9,9,9,.88);
+    }
+
+    html[data-theme="dark"] .brand-mark {
+      background: #000;
+      border-color: #282828;
+    }
+
+    html[data-theme="dark"] .panel,
+    html[data-theme="dark"] .product-card,
+    html[data-theme="dark"] .cart-item,
+    html[data-theme="dark"] .sale-card,
+    html[data-theme="dark"] .modal,
+    html[data-theme="dark"] .btn,
+    html[data-theme="dark"] .filter-chip,
+    html[data-theme="dark"] .icon-btn,
+    html[data-theme="dark"] .input,
+    html[data-theme="dark"] .select,
+    html[data-theme="dark"] textarea {
+      background: var(--paper);
+      color: var(--ink);
+      border-color: var(--line-strong);
+    }
+
+    html[data-theme="dark"] .input::placeholder,
+    html[data-theme="dark"] textarea::placeholder {
+      color: #777772;
+    }
+
+    html[data-theme="dark"] .photo,
+    html[data-theme="dark"] .cart-item img {
+      background: #f5f5f0;
+      border-color: #343431;
+    }
+
+    html[data-theme="dark"] .btn:hover,
+    html[data-theme="dark"] .filter-chip:hover,
+    html[data-theme="dark"] .product-card:hover {
+      border-color: #f7f7f2;
+    }
+
+    html[data-theme="dark"] .btn.primary,
+    html[data-theme="dark"] .filter-chip.active,
+    html[data-theme="dark"] .big-btn,
+    html[data-theme="dark"] .qty-controls button,
+    html[data-theme="dark"] .modal-close {
+      background: #f7f7f2;
+      color: #000;
+      border-color: #f7f7f2;
+    }
+
+    html[data-theme="dark"] .big-btn.secondary,
+    html[data-theme="dark"] .big-btn.danger {
+      background: #141414;
+      color: var(--ink);
+      border-color: var(--line-strong);
+    }
+
+    html[data-theme="dark"] .big-btn.danger,
+    html[data-theme="dark"] .btn.danger {
+      color: var(--danger);
+    }
+
+    html[data-theme="dark"] .toast {
+      background: #f7f7f2;
+      color: #000;
+    }
+
+    html[data-theme="dark"] option {
+      background: #141414;
+      color: #f7f7f2;
+    }
+    html:not([data-theme="dark"]) .panel-head img {
+      filter: invert(1);
+    }
+
+    html[data-theme="dark"] .panel-head img {
+      filter: none;
+    }
+
+
+    @media print {
+      body * { visibility: hidden; }
+      #receiptContent, #receiptContent * { visibility: visible; }
+      #receiptContent { position: fixed; inset: 0; background: #fff; padding: 0; }
+      .receipt-actions, .modal-head { display: none !important; }
+    }
+
+    @media (max-width: 1080px) {
+      .board { grid-template-columns: 1fr; }
+      .sale-panel { position: static; }
+      .product-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 680px) {
+      .shell { width: min(100% - 14px, 1380px); padding-top: 8px; }
+      .topbar { align-items: flex-start; }
+      .brand-title span, .chip { display: none; }
+      .top-actions { gap: 6px; }
+      .btn { padding: 9px 10px; font-size: .74rem; }
+      .panel { border-radius: 22px; }
+      .products-top { grid-template-columns: 1fr; }
+      .product-grid { grid-template-columns: 1fr; padding: 12px; }
+      .photo { height: 320px; }
+      .form-grid { grid-template-columns: 1fr; }
+      .checkout-actions, .receipt-actions { grid-template-columns: 1fr; }
+      .sale-card { grid-template-columns: 1fr; }
+      .receipt-line { grid-template-columns: 52px 1fr; }
+      .receipt-line strong { grid-column: 2; }
+      footer { padding-bottom: 24px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <div class="brand" aria-label="Soap Money POS">
+        <span class="brand-mark"><img src="assets/soap-money-sm-logo.png" alt="Soap Money SM logo" /></span>
+        <span class="brand-title"><strong>CoreSoap POS</strong><span>Soap Money</span></span>
+      </div>
+      <div class="top-actions">
+        <span class="chip" id="clockChip">--:--</span>
+        <button class="btn" id="themeToggle" type="button" aria-pressed="false">Dark Mode</button>
+        <button class="btn" id="soundToggle" type="button">Sound On</button>
+        <button class="btn primary" id="openReceiptBtn" type="button">Receipt</button>
+      </div>
+    </header>
+
+    <main class="board">
+      <section class="panel" aria-labelledby="productsTitle">
+        <div class="panel-head">
+          <h1 id="productsTitle">Products</h1>
+          <img src="assets/soap-money-wordmark.png" alt="Soap Money" />
+        </div>
+        <div class="products-top">
+          <input class="input" id="productSearch" type="search" placeholder="Search product" aria-label="Search product" />
+          <button class="btn" id="resetProductsBtn" type="button">Reset</button>
+        </div>
+        <div class="filter-row" aria-label="Product filters">
+          <button class="filter-chip active" type="button" data-filter="all">All</button>
+          <button class="filter-chip" type="button" data-filter="tees">Tees</button>
+          <button class="filter-chip" type="button" data-filter="accessories">Accessories</button>
+          <button class="filter-chip" type="button" data-filter="limited">Limited</button>
+        </div>
+        <div class="product-grid" id="productGrid" aria-live="polite"></div>
+      </section>
+
+      <aside class="panel sale-panel" aria-labelledby="saleTitle">
+        <div class="panel-head">
+          <h2 id="saleTitle">Sale</h2>
+          <button class="btn danger" id="clearCartBtn" type="button">Clear</button>
+        </div>
+        <div class="cart-list" id="cartItems"></div>
+        <form class="sale-form" id="saleForm" novalidate>
+          <div class="form-grid">
+            <label>
+              <span>Name <b class="required-star">*</b></span>
+              <input class="input" id="customerName" name="customerName" type="text" placeholder="Customer name" required />
+            </label>
+            <label>
+              <span>Email receipt <b class="required-star">*</b></span>
+              <input class="input" id="customerEmail" name="customerEmail" type="email" placeholder="customer@email.com" required />
+            </label>
+            <label>
+              <span>Payment <b class="required-star">*</b></span>
+              <select class="select" id="paymentMethod" name="paymentMethod" required>
+                <option value="">Select</option>
+                <option>Cash</option>
+                <option>Card</option>
+                <option>Cash App</option>
+                <option>Zelle</option>
+                <option>Online</option>
+              </select>
+            </label>
+            <label>
+              <span>Status <b class="required-star">*</b></span>
+              <select class="select" id="orderStatus" name="orderStatus" required>
+                <option>Paid</option>
+                <option>Pending</option>
+                <option>Fulfilled</option>
+              </select>
+            </label>
+            <label class="full">
+              <span>Notes</span>
+              <textarea id="orderNotes" name="orderNotes" rows="2" placeholder="Optional"></textarea>
+            </label>
+          </div>
+
+          <div class="totals" aria-label="Sale totals">
+            <div class="total-row"><span>Subtotal</span><strong id="subtotalText">$0.00</strong></div>
+            <div class="total-row"><span>Tax</span><strong id="taxText">$0.00</strong></div>
+            <div class="total-row final"><span>Total</span><strong id="totalText">$0.00</strong></div>
+          </div>
+
+          <div class="checkout-actions">
+            <button class="big-btn secondary" id="emailReceiptBtn" type="button">Email Receipt</button>
+            <button class="big-btn secondary" id="previewReceiptBtn" type="button">Preview</button>
+            <button class="big-btn wide" id="completeSaleBtn" type="submit">Complete Sale</button>
+          </div>
+        </form>
+      </aside>
+    </main>
+
+    <section class="panel recent" aria-labelledby="recentTitle">
+      <div class="panel-head">
+        <h2 id="recentTitle">Recent</h2>
+        <div>
+          <button class="btn" id="exportCsvBtn" type="button">CSV</button>
+          <button class="btn danger" id="clearSalesBtn" type="button">Clear</button>
+        </div>
+      </div>
+      <div class="recent-list" id="salesList"></div>
+    </section>
+
+    <footer>
+      <div>Soap Money 2026, All Rights Reserved. | Powered by RoboTechi.</div>
+      <div>Final sale. No returns. No exchanges.</div>
+    </footer>
+  </div>
+
+  <div class="modal-backdrop" id="receiptModal" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="receiptTitle">
+      <div class="modal-head">
+        <h2 id="receiptTitle">Receipt</h2>
+        <button class="modal-close" type="button" data-close-modal="receiptModal">×</button>
+      </div>
+      <div class="modal-body"><div id="receiptContent"></div></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite">Ready</div>
+
+  <script>
+    const products = [
+      { id: 'soap-money-tees', name: 'Soap Money Tees', category: 'tees', price: 50, badge: 'Heavy GSM', image: 'assets/product-heavy-gsm-tee-front.webp', backImage: 'assets/product-heavy-gsm-tee-back.webp', sizes: ['S','M','L','XL','2XL'], views: ['Front','Back'] },
+      { id: 'soap-card', name: 'Soap Card', category: 'limited', price: 150, badge: 'Limited', image: 'assets/product-soap-card-front.webp', backImage: 'assets/product-soap-card-back.webp', sizes: ['S','M','L','XL','2XL'], views: ['Front','Back'] },
+      { id: 'trucker-hat', name: 'Soap Money Trucker Hat', category: 'accessories', price: 50, badge: 'One Size', image: 'assets/product-trucker-cap.webp', sizes: ['One Size'], views: ['Front'] },
+      { id: 'laundry-card', name: 'Soap Money Laundry Card', category: 'accessories', price: 100, badge: 'Card', image: 'assets/product-laundry-card-front.webp', backImage: 'assets/product-laundry-card-back.webp', sizes: ['Standard'], views: ['Front','Back'] }
+    ];
+
+    const STORAGE_KEY = 'coresoap_pos_clean_sales_v1';
+    const TAX_RATE = 0;
+    let activeFilter = 'all';
+    let cart = [];
+    let sales = loadSales();
+    let lastReceipt = null;
+    let soundOn = true;
+    let audioContext = null;
+
+    const $ = selector => document.querySelector(selector);
+    const $$ = selector => Array.from(document.querySelectorAll(selector));
+    const money = value => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value || 0);
+    const escapeHtml = value => String(value ?? '').replace(/[&<>'"]/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#039;', '"': '&quot;' }[char]));
+
+    const THEME_KEY = 'coresoap_pos_theme_v1';
+    const themeToggle = document.getElementById('themeToggle');
+    const themeMeta = document.querySelector('meta[name="theme-color"]');
+
+    function applyTheme(theme) {
+      const cleanTheme = theme === 'dark' ? 'dark' : 'light';
+      document.documentElement.dataset.theme = cleanTheme;
+      localStorage.setItem(THEME_KEY, cleanTheme);
+      if (themeMeta) themeMeta.setAttribute('content', cleanTheme === 'dark' ? '#090909' : '#ffffff');
+      if (themeToggle) {
+        themeToggle.textContent = cleanTheme === 'dark' ? 'Light Mode' : 'Dark Mode';
+        themeToggle.setAttribute('aria-pressed', cleanTheme === 'dark' ? 'true' : 'false');
+      }
+    }
+
+    applyTheme(localStorage.getItem(THEME_KEY) || 'light');
+
+
+    function loadSales() {
+      try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
+      catch { return []; }
+    }
+    function saveSales() { localStorage.setItem(STORAGE_KEY, JSON.stringify(sales)); }
+
+    function showToast(message) {
+      $('#toast').textContent = message;
+      $('#toast').classList.add('show');
+      clearTimeout(showToast.timer);
+      showToast.timer = setTimeout(() => $('#toast').classList.remove('show'), 1800);
+    }
+
+    function initAudio() {
+      if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioContext.state === 'suspended') audioContext.resume();
+    }
+
+    function playBubbleSound() {
+      if (!soundOn) return;
+      try {
+        initAudio();
+        const now = audioContext.currentTime;
+        const osc = audioContext.createOscillator();
+        const gain = audioContext.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(620, now);
+        osc.frequency.exponentialRampToValueAtTime(1180, now + .045);
+        osc.frequency.exponentialRampToValueAtTime(390, now + .14);
+        gain.gain.setValueAtTime(.0001, now);
+        gain.gain.exponentialRampToValueAtTime(.13, now + .012);
+        gain.gain.exponentialRampToValueAtTime(.0001, now + .16);
+        osc.connect(gain);
+        gain.connect(audioContext.destination);
+        osc.start(now);
+        osc.stop(now + .17);
+      } catch (error) { soundOn = false; $('#soundToggle').textContent = 'Sound Off'; }
+    }
+
+    function burstBubbles(x, y) {
+      for (let i = 0; i < 7; i += 1) {
+        const bubble = document.createElement('span');
+        bubble.className = 'micro-bubble';
+        bubble.style.left = `${x + (Math.random() * 44 - 22)}px`;
+        bubble.style.top = `${y + (Math.random() * 20 - 10)}px`;
+        bubble.style.animationDelay = `${Math.random() * .1}s`;
+        document.body.appendChild(bubble);
+        setTimeout(() => bubble.remove(), 850);
+      }
+    }
+
+    document.addEventListener('click', event => {
+      if (!event.target.closest('button, .product-card, a')) return;
+      playBubbleSound();
+      if (event.clientX && event.clientY) burstBubbles(event.clientX, event.clientY);
+    }, true);
+
+    function updateClock() {
+      $('#clockChip').textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+    updateClock(); setInterval(updateClock, 30000);
+
+    function getProductImage(product, view) { return view === 'Back' && product.backImage ? product.backImage : product.image; }
+
+    function visibleProducts() {
+      const query = $('#productSearch').value.trim().toLowerCase();
+      return products.filter(product => {
+        const matchFilter = activeFilter === 'all' || product.category === activeFilter;
+        const matchQuery = !query || `${product.name} ${product.badge}`.toLowerCase().includes(query);
+        return matchFilter && matchQuery;
+      });
+    }
+
+    function renderProducts() {
+      $('#productGrid').innerHTML = visibleProducts().map(product => `
+        <article class="product-card" data-card="${product.id}">
+          <div class="photo"><span class="badge">${escapeHtml(product.badge)}</span><img id="img-${product.id}" src="${product.image}" alt="${escapeHtml(product.name)}" /></div>
+          <div class="product-name">${escapeHtml(product.name)}</div>
+          <div class="product-price">${money(product.price)}</div>
+          <div class="product-options">
+            <select class="select" data-size-for="${product.id}" aria-label="${escapeHtml(product.name)} size">
+              ${product.sizes.map(size => `<option>${escapeHtml(size)}</option>`).join('')}
+            </select>
+            <select class="select" data-view-for="${product.id}" aria-label="${escapeHtml(product.name)} view">
+              ${product.views.map(view => `<option>${escapeHtml(view)}</option>`).join('')}
+            </select>
+          </div>
+          <button class="btn primary add-product" type="button" data-add="${product.id}">Add</button>
+        </article>
+      `).join('') || '<div class="empty">No product</div>';
+    }
+
+    function addToCart(productId) {
+      const product = products.find(item => item.id === productId);
+      if (!product) return;
+      const size = document.querySelector(`[data-size-for="${productId}"]`)?.value || product.sizes[0];
+      const view = document.querySelector(`[data-view-for="${productId}"]`)?.value || product.views[0];
+      const image = getProductImage(product, view);
+      const key = `${product.id}-${size}-${view}`;
+      const existing = cart.find(item => item.key === key);
+      if (existing) existing.quantity += 1;
+      else cart.push({ key, productId, name: product.name, price: product.price, size, view, image, quantity: 1 });
+      renderCart();
+      showToast('Added');
+    }
+
+    function totals() {
+      const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+      const tax = subtotal * TAX_RATE;
+      return { subtotal, tax, total: subtotal + tax, count: cart.reduce((sum, item) => sum + item.quantity, 0) };
+    }
+
+    function renderCart() {
+      $('#cartItems').innerHTML = cart.length ? cart.map(item => `
+        <article class="cart-item">
+          <img src="${item.image}" alt="${escapeHtml(item.name)}" />
+          <div>
+            <h3>${escapeHtml(item.name)}</h3>
+            <p>${escapeHtml(item.view)} • ${escapeHtml(item.size)} • ${money(item.price)}</p>
+            <div class="qty-row">
+              <div class="qty-controls">
+                <button type="button" data-minus="${item.key}">−</button>
+                <span>${item.quantity}</span>
+                <button type="button" data-plus="${item.key}">+</button>
+              </div>
+              <strong class="line-total">${money(item.price * item.quantity)}</strong>
+            </div>
+          </div>
+        </article>
+      `).join('') : '<div class="empty">Add product</div>';
+      const t = totals();
+      $('#subtotalText').textContent = money(t.subtotal);
+      $('#taxText').textContent = money(t.tax);
+      $('#totalText').textContent = money(t.total);
+    }
+
+    function changeQty(key, delta) {
+      const item = cart.find(line => line.key === key);
+      if (!item) return;
+      item.quantity += delta;
+      if (item.quantity <= 0) cart = cart.filter(line => line.key !== key);
+      renderCart();
+    }
+
+    function validateSaleForm() {
+      if (!cart.length) { showToast('Add product first'); return false; }
+      const form = $('#saleForm');
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        showToast('Complete required fields');
+        return false;
+      }
+      return true;
+    }
+
+    function buildSale() {
+      const t = totals();
+      return {
+        id: `SM-${Date.now().toString().slice(-8)}`,
+        date: new Date().toISOString(),
+        customer: $('#customerName').value.trim(),
+        email: $('#customerEmail').value.trim(),
+        payment: $('#paymentMethod').value,
+        status: $('#orderStatus').value,
+        notes: $('#orderNotes').value.trim(),
+        items: cart.map(item => ({ ...item })),
+        subtotal: t.subtotal,
+        tax: t.tax,
+        total: t.total,
+        itemCount: t.count,
+        policy: 'Final sale. No returns. No exchanges.'
+      };
+    }
+
+    function receiptText(sale) {
+      const lines = [
+        'SOAP MONEY RECEIPT',
+        `Receipt: ${sale.id}`,
+        `Date: ${new Date(sale.date).toLocaleString()}`,
+        `Customer: ${sale.customer}`,
+        `Email: ${sale.email}`,
+        '',
+        'Items:'
+      ];
+      sale.items.forEach(item => lines.push(`- ${item.name} | ${item.view} | ${item.size} | Qty ${item.quantity} | ${money(item.price * item.quantity)}`));
+      lines.push('', `Subtotal: ${money(sale.subtotal)}`, `Tax: ${money(sale.tax)}`, `Total: ${money(sale.total)}`, `Payment: ${sale.payment}`, `Status: ${sale.status}`, sale.notes ? `Notes: ${sale.notes}` : '', '', sale.policy, 'Soap Money 2026, All Rights Reserved. | Powered by RoboTechi.');
+      return lines.filter(Boolean).join('\n');
+    }
+
+    function receiptHtml(sale) {
+      return `
+        <div class="receipt-paper">
+          <img class="receipt-logo" src="assets/soap-money-wordmark.png" alt="Soap Money" />
+          <div class="receipt-title">SOAP MONEY RECEIPT</div>
+          <div class="receipt-meta">${escapeHtml(sale.id)} • ${new Date(sale.date).toLocaleString()}</div>
+          <div class="receipt-meta">${escapeHtml(sale.customer)} • ${escapeHtml(sale.email)}</div>
+          <div style="height:12px"></div>
+          ${sale.items.map(item => `
+            <div class="receipt-line">
+              <img src="${item.image}" alt="${escapeHtml(item.name)}" />
+              <div><h4>${escapeHtml(item.name)}</h4><p>${escapeHtml(item.view)} • ${escapeHtml(item.size)} • Qty ${item.quantity}</p></div>
+              <strong>${money(item.price * item.quantity)}</strong>
+            </div>
+          `).join('')}
+          <div style="height:8px"></div>
+          <div class="receipt-total"><span>Subtotal</span><strong>${money(sale.subtotal)}</strong></div>
+          <div class="receipt-total"><span>Tax</span><strong>${money(sale.tax)}</strong></div>
+          <div class="receipt-total"><span>Payment</span><strong>${escapeHtml(sale.payment)}</strong></div>
+          <div class="receipt-total"><span>Status</span><strong>${escapeHtml(sale.status)}</strong></div>
+          <div class="receipt-total final"><span>Total</span><strong>${money(sale.total)}</strong></div>
+          ${sale.notes ? `<p><strong>Notes:</strong> ${escapeHtml(sale.notes)}</p>` : ''}
+          <p style="text-align:center;color:#666;line-height:1.45">${escapeHtml(sale.policy)}<br>Soap Money 2026, All Rights Reserved. | Powered by RoboTechi.</p>
+          <div class="receipt-actions">
+            <button class="big-btn secondary" id="copyReceiptBtn" type="button">Copy</button>
+            <button class="big-btn secondary" id="printReceiptBtn" type="button">Print</button>
+            <button class="big-btn" id="sendReceiptBtn" type="button">Email</button>
+          </div>
+        </div>`;
+    }
+
+    function openModal(id) { const modal = document.getElementById(id); modal.classList.add('show'); modal.setAttribute('aria-hidden', 'false'); }
+    function closeModal(id) { const modal = document.getElementById(id); modal.classList.remove('show'); modal.setAttribute('aria-hidden', 'true'); }
+    function showReceipt(sale) { lastReceipt = sale; $('#receiptContent').innerHTML = receiptHtml(sale); openModal('receiptModal'); }
+
+    function emailReceipt(sale) {
+      const subject = encodeURIComponent(`Soap Money Receipt ${sale.id}`);
+      const body = encodeURIComponent(receiptText(sale));
+      window.location.href = `mailto:${encodeURIComponent(sale.email)}?subject=${subject}&body=${body}`;
+      showToast('Email opened');
+    }
+
+    function completeSale() {
+      if (!validateSaleForm()) return;
+      const sale = buildSale();
+      sales.unshift(sale);
+      saveSales();
+      cart = [];
+      $('#saleForm').reset();
+      $('#orderStatus').value = 'Paid';
+      renderCart();
+      renderSales();
+      showReceipt(sale);
+      showToast('Sale completed');
+    }
+
+    function renderSales() {
+      $('#salesList').innerHTML = sales.length ? sales.slice(0, 8).map(sale => `
+        <article class="sale-card">
+          <div><strong>${escapeHtml(sale.id)} • ${money(sale.total)}</strong><span>${escapeHtml(sale.customer)} • ${new Date(sale.date).toLocaleString()}</span></div>
+          <div class="sale-actions"><button class="icon-btn" type="button" data-view-sale="${sale.id}">Receipt</button><button class="icon-btn" type="button" data-email-sale="${sale.id}">Email</button></div>
+        </article>
+      `).join('') : '<div class="empty">No sales</div>';
+    }
+
+    function exportCsv() {
+      if (!sales.length) { showToast('No sales'); return; }
+      const headers = ['Receipt ID','Date','Customer','Email','Payment','Status','Items','Subtotal','Tax','Total','Notes'];
+      const rows = sales.map(sale => [sale.id, new Date(sale.date).toLocaleString(), sale.customer, sale.email, sale.payment, sale.status, sale.items.map(item => `${item.name} ${item.view} ${item.size} x${item.quantity}`).join('; '), sale.subtotal, sale.tax, sale.total, sale.notes]);
+      const csv = [headers, ...rows].map(row => row.map(value => `"${String(value ?? '').replace(/"/g, '""')}"`).join(',')).join('\n');
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = `coresoap-sales-${new Date().toISOString().slice(0,10)}.csv`; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+      showToast('CSV downloaded');
+    }
+
+    $('#productGrid').addEventListener('click', event => {
+      const add = event.target.closest('[data-add]');
+      if (add) { addToCart(add.dataset.add); return; }
+      const viewSelect = event.target.closest('[data-view-for]');
+      if (viewSelect) {
+        const product = products.find(item => item.id === viewSelect.dataset.viewFor);
+        if (product) document.getElementById(`img-${product.id}`).src = getProductImage(product, viewSelect.value);
+      }
+    });
+    $('#productGrid').addEventListener('change', event => {
+      const select = event.target.closest('[data-view-for]');
+      if (!select) return;
+      const product = products.find(item => item.id === select.dataset.viewFor);
+      if (product) document.getElementById(`img-${product.id}`).src = getProductImage(product, select.value);
+    });
+
+    $('#cartItems').addEventListener('click', event => {
+      const plus = event.target.closest('[data-plus]');
+      const minus = event.target.closest('[data-minus]');
+      if (plus) changeQty(plus.dataset.plus, 1);
+      if (minus) changeQty(minus.dataset.minus, -1);
+    });
+
+    $('#saleForm').addEventListener('submit', event => { event.preventDefault(); completeSale(); });
+    $('#emailReceiptBtn').addEventListener('click', () => { if (!validateSaleForm()) return; const sale = buildSale(); showReceipt(sale); emailReceipt(sale); });
+    $('#previewReceiptBtn').addEventListener('click', () => { if (!validateSaleForm()) return; showReceipt(buildSale()); });
+    $('#openReceiptBtn').addEventListener('click', () => { if (lastReceipt) showReceipt(lastReceipt); else showToast('No receipt'); });
+    $('#clearCartBtn').addEventListener('click', () => { cart = []; renderCart(); showToast('Cleared'); });
+    $('#resetProductsBtn').addEventListener('click', () => { $('#productSearch').value = ''; activeFilter = 'all'; $$('.filter-chip').forEach(chip => chip.classList.toggle('active', chip.dataset.filter === 'all')); renderProducts(); });
+    $('#productSearch').addEventListener('input', renderProducts);
+
+    $$('.filter-chip').forEach(chip => chip.addEventListener('click', () => {
+      activeFilter = chip.dataset.filter;
+      $$('.filter-chip').forEach(item => item.classList.remove('active'));
+      chip.classList.add('active');
+      renderProducts();
+    }));
+
+    $('#salesList').addEventListener('click', event => {
+      const view = event.target.closest('[data-view-sale]');
+      const email = event.target.closest('[data-email-sale]');
+      if (view) { const sale = sales.find(item => item.id === view.dataset.viewSale); if (sale) showReceipt(sale); }
+      if (email) { const sale = sales.find(item => item.id === email.dataset.emailSale); if (sale) emailReceipt(sale); }
+    });
+
+    $('#receiptContent').addEventListener('click', async event => {
+      if (event.target.closest('#sendReceiptBtn') && lastReceipt) emailReceipt(lastReceipt);
+      if (event.target.closest('#printReceiptBtn')) window.print();
+      if (event.target.closest('#copyReceiptBtn') && lastReceipt) {
+        try { await navigator.clipboard.writeText(receiptText(lastReceipt)); showToast('Copied'); }
+        catch { showToast('Copy unavailable'); }
+      }
+    });
+
+    $$('[data-close-modal]').forEach(btn => btn.addEventListener('click', () => closeModal(btn.dataset.closeModal)));
+    $$('.modal-backdrop').forEach(backdrop => backdrop.addEventListener('click', event => { if (event.target === backdrop) closeModal(backdrop.id); }));
+    document.addEventListener('keydown', event => { if (event.key === 'Escape') $$('.modal-backdrop.show').forEach(backdrop => closeModal(backdrop.id)); });
+
+    $('#themeToggle').addEventListener('click', () => {
+      const nextTheme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+      applyTheme(nextTheme);
+      showToast(nextTheme === 'dark' ? 'Dark mode' : 'Light mode');
+    });
+    $('#soundToggle').addEventListener('click', () => { soundOn = !soundOn; $('#soundToggle').textContent = soundOn ? 'Sound On' : 'Sound Off'; });
+    $('#exportCsvBtn').addEventListener('click', exportCsv);
+    $('#clearSalesBtn').addEventListener('click', () => { if (!sales.length) return showToast('No sales'); if (!confirm('Clear recent sales?')) return; sales = []; saveSales(); renderSales(); showToast('Sales cleared'); });
+
+    renderProducts(); renderCart(); renderSales();
+  </script>
+</body>
+</html>
